@@ -1,0 +1,825 @@
+//Tip Calculator
+
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: TipCalculatorUI(),
+    );
+  }
+}
+
+class TipCalculatorUI extends StatefulWidget {
+  const TipCalculatorUI({super.key});
+
+  @override
+  State<TipCalculatorUI> createState() => _TipCalculatorUIState();
+}
+
+class _TipCalculatorUIState extends State<TipCalculatorUI> {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController billController = TextEditingController();
+  final TextEditingController peopleController = TextEditingController();
+
+  String selectedTip = "10";
+  String greetingMessage = "Hi Customer, your total bill for today is";
+  String totalAmount = "Rs. 0.00";
+
+  void calculateTip() {
+    if (nameController.text.isEmpty ||
+        billController.text.isEmpty ||
+        peopleController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill all fields")),
+      );
+      return;
+    }
+
+    double bill = double.parse(billController.text);
+    int people = int.parse(peopleController.text);
+    double tipPercent = double.parse(selectedTip);
+
+    double tipAmount = (bill * tipPercent) / 100;
+    double totalForOnePerson = bill + tipAmount;
+
+    double finalTotal = totalForOnePerson * people;
+
+    setState(() {
+      greetingMessage =
+          "Hi ${nameController.text}, your total bill for $people people is";
+      totalAmount = "Rs. ${finalTotal.toStringAsFixed(2)}";
+    });
+  }
+
+  void clearAll() {
+    nameController.clear();
+    billController.clear();
+    peopleController.clear();
+
+    setState(() {
+      selectedTip = "10";
+      greetingMessage = "Hi Customer, your total bill for today is";
+      totalAmount = "Rs. 0.00";
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Tip Calculator"),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Text(
+                      greetingMessage,
+                      style: const TextStyle(fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      totalAmount,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        labelText: "Customer Name",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: billController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: "Bill Amount",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<String>(
+                      value: selectedTip,
+                      decoration: const InputDecoration(
+                        labelText: "Tip Percentage",
+                        border: OutlineInputBorder(),
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: "5", child: Text("5%")),
+                        DropdownMenuItem(value: "10", child: Text("10%")),
+                        DropdownMenuItem(value: "15", child: Text("15%")),
+                        DropdownMenuItem(value: "20", child: Text("20%")),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          selectedTip = value!;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: peopleController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: "Number of People",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const Spacer(),
+
+            // 🔹 BUTTONS
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: calculateTip,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                ),
+                child: const Text("Calculate Tip"),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: clearAll,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                ),
+                child: const Text("Clear All"),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+//Bill Calculator
+
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'E-Bill Calculator',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const BillCalculator(),
+    );
+  }
+}
+
+class BillCalculator extends StatefulWidget {
+  const BillCalculator({super.key});
+
+  @override
+  State<BillCalculator> createState() => _BillCalculatorState();
+}
+
+class _BillCalculatorState extends State<BillCalculator> {
+  final _formKey = GlobalKey<FormState>();
+
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController accountController = TextEditingController();
+  final TextEditingController unitsController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+
+  String selectedMonth = 'January';
+  double totalBill = 0.0;
+  String greetingMessage = '';
+
+  final List<String> months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ];
+
+  void calculateBill() {
+    if (_formKey.currentState!.validate()) {
+      int units = int.parse(unitsController.text);
+      double energyCharge = 0;
+      double fixedCharge = 0;
+
+      if (units <= 30) {
+        energyCharge = units * 30;
+        fixedCharge = 400;
+      } else if (units <= 60) {
+        energyCharge = (30 * 30) + (units - 30) * 37;
+        fixedCharge = 550;
+      } else if (units <= 90) {
+        energyCharge = (30 * 30) + (30 * 37) + (units - 60) * 42;
+        fixedCharge = 650;
+      } else if (units <= 120) {
+        energyCharge = (30 * 30) + (30 * 37) + (30 * 42) + (units - 90) * 50;
+        fixedCharge = 1500;
+      } else if (units <= 180) {
+        energyCharge =
+            (30 * 30) + (30 * 37) + (30 * 42) + (30 * 50) + (units - 120) * 75;
+        fixedCharge = 1500;
+      } else {
+        energyCharge = (30 * 30) +
+            (30 * 37) +
+            (30 * 42) +
+            (30 * 50) +
+            (60 * 75) +
+            (units - 180) * 85;
+        fixedCharge = 2000;
+      }
+
+      setState(() {
+        totalBill = energyCharge + fixedCharge;
+        greetingMessage =
+            "Hi ${nameController.text}, your $selectedMonth month total bill is:";
+      });
+    }
+  }
+
+  void clearAll() {
+    nameController.clear();
+    accountController.clear();
+    unitsController.clear();
+    phoneController.clear();
+    setState(() {
+      totalBill = 0.0;
+      greetingMessage = '';
+      selectedMonth = 'January';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("E-Bill Calculator")),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              if (greetingMessage.isNotEmpty)
+                Card(
+                  color: Colors.blue.shade50,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Text(
+                          greetingMessage,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Rs. ${totalBill.toStringAsFixed(2)}",
+                          style: const TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 20),
+              Card(
+                elevation: 3,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      const Text(
+                        "Bill Details",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: nameController,
+                        decoration:
+                            const InputDecoration(labelText: "Customer Name"),
+                        validator: (value) =>
+                            value!.isEmpty ? "Required field" : null,
+                      ),
+                      DropdownButtonFormField(
+                        value: selectedMonth,
+                        items: months
+                            .map((m) => DropdownMenuItem(
+                                  value: m,
+                                  child: Text(m),
+                                ))
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedMonth = value!;
+                          });
+                        },
+                        decoration: const InputDecoration(labelText: "Month"),
+                      ),
+                      TextFormField(
+                        controller: accountController,
+                        decoration:
+                            const InputDecoration(labelText: "Account Number"),
+                        validator: (value) =>
+                            value!.isEmpty ? "Required field" : null,
+                      ),
+                      TextFormField(
+                        controller: unitsController,
+                        decoration:
+                            const InputDecoration(labelText: "Units Consumed"),
+                        keyboardType: TextInputType.number,
+                        validator: (value) =>
+                            value!.isEmpty ? "Required field" : null,
+                      ),
+                      TextFormField(
+                        controller: phoneController,
+                        decoration:
+                            const InputDecoration(labelText: "Phone Number"),
+                        keyboardType: TextInputType.phone,
+                        validator: (value) =>
+                            value!.isEmpty ? "Required field" : null,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: calculateBill,
+                child: const Text("Calculate Bill"),
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton(
+                onPressed: clearAll,
+                child: const Text("Clear All"),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+//Supase
+create table profiles (
+  id uuid references auth.users not null primary key,
+  name text,
+  registration_number text
+);
+
+//main
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'signup_page.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Supabase with your Project URL and Anon Key
+  await Supabase.initialize(
+    url: 'https://jwijyvekduzrmqrlxbjd.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3aWp5dmVrZHV6cm1xcmx4YmpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NDkxNjAsImV4cCI6MjA4NzUyNTE2MH0.-IW808JQiS99_Q6HKXQ-eBdcP0WPQ5yzan-hI-2SRoY',
+  );
+  
+
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Student Signup',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const SignupPage(),
+    );
+  }
+}
+
+//home_page
+import 'package:flutter/material.dart';
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Homepage"),
+        backgroundColor: Colors.grey[300],
+        // Back button to go back to signup (per your image layout)
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: const Center(
+        child: Text(
+          "Welcome to Homepage !",
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+}
+
+//signup_page
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'home_page.dart';
+
+class SignupPage extends StatefulWidget {
+  const SignupPage({super.key});
+
+  @override
+  State<SignupPage> createState() => _SignupPageState();
+}
+
+class _SignupPageState extends State<SignupPage> {
+  // Global key for the form to handle validation
+  final _formKey = GlobalKey<FormState>();
+
+  // Text controllers to capture user input
+  final _nameController = TextEditingController();
+  final _regNumberController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  bool _isLoading = false;
+
+  // Function to handle the Signup logic
+  Future<void> _handleSignUp() async {
+    // 1. Check if form is valid (all fields filled)
+    if (!_formKey.currentState!.validate()) return;
+
+    // 2. Check if passwords match
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Passwords do not match!")),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      // 3. Call Supabase Auth to create a user
+      final response = await Supabase.instance.client.auth.signUp(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+        // We pass extra data (metadata) like name and reg number
+        data: {
+          'full_name': _nameController.text.trim(),
+          'registration_number': _regNumberController.text.trim(),
+        },
+      );
+
+      if (response.user != null) {
+        // 4. Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Account created successfully!")),
+          );
+          // 5. Navigate to Homepage
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        }
+      }
+    } catch (e) {
+      // Handle errors (e.g., email already exists, no internet)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: ${e.toString()}")),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("SignUp Page"), backgroundColor: Colors.grey[300]),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Form(
+          key: _formKey, // Assign the form key
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Welcome to Student Sign Up",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              
+              // Custom method to build text fields to keep code clean
+              _buildTextField("Name with initials", _nameController),
+              _buildTextField("Registration Number", _regNumberController),
+              _buildTextField("Email", _emailController, isEmail: true),
+              _buildTextField("Password", _passwordController, isPassword: true),
+              _buildTextField("Confirm Password", _confirmPasswordController, isPassword: true),
+              
+              const SizedBox(height: 30),
+              
+              Center(
+                child: _isLoading 
+                  ? const CircularProgressIndicator()
+                  : TextButton(
+                      onPressed: _handleSignUp,
+                      child: const Text("Sign Up", style: TextStyle(fontSize: 18, color: Colors.blue)),
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Helper widget to create the styled text fields from your image
+  Widget _buildTextField(String label, TextEditingController controller, {bool isPassword = false, bool isEmail = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        controller: controller,
+        obscureText: isPassword,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        ),
+        // Validation logic: Ensure field is not empty
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return "This field is mandatory";
+          }
+          return null;
+        },
+      ),
+    );
+  }
+}
+
+
+//Interface
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.cyanAccent,
+
+            leading: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Image.asset(
+                "image1.png",
+                fit: BoxFit.cover,
+              ),
+              ),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    print("Notification");
+                }, icon: const Icon(
+                  Icons.notification_add,
+                  color: Colors.blue,  
+                ),
+                ),
+                IconButton(onPressed: () {
+                  print("Account");
+                }, icon: const Icon(
+                  Icons.person,
+                  color: Colors.amberAccent,
+                  size: 30,
+                ))
+              ],
+          ),
+          body: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          "For You",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            "Top Charts",
+                            style: TextStyle(
+                              color: Colors.grey
+                              ),
+                            ),
+                            ),
+                            ),
+                      Expanded(child: Center(
+                        child: Text(
+                          "Premium",
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ),
+                      ),
+                      Expanded(child: Center(
+                        child: Text(
+                          "Kids",
+                          style: TextStyle(
+                            color: Colors.grey
+                          ),
+                          ),
+                      )
+                      )
+                  ],
+                ),
+              ),
+              Divider(),
+              Container(
+                margin: EdgeInsets.all(10),
+                height: 180,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  image: DecorationImage(
+                    image: AssetImage("Image1.png"),
+                    fit: BoxFit.cover
+                    )
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Explore More games",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              child: Container(
+                height: 60,
+
+                decoration: BoxDecoration(
+                  color: Colors.cyanAccent,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.flag),
+                    SizedBox(width: 10),
+                    Text(
+                      "Racing",
+                      style: TextStyle(fontSize: 16),
+                    )
+                  ],
+                ),
+              ),
+              ),  
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                child: Container(
+                  height: 60,
+
+                  decoration: BoxDecoration(
+                    color: Colors.cyanAccent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.sports
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        "Sports",
+                        style: TextStyle(fontSize: 16),
+                        ),
+                    ],
+                  ),
+                ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  child: Container(
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.cyanAccent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.business),
+                        SizedBox(width: 10),
+                        Text(
+                          "Bord",
+                          style: TextStyle(fontSize: 16),
+                        )
+                      ],
+                    ),
+                  ),
+                  ),        
+            ],
+          ),
+        )
+        ),
+    );
+  }
+}
+
